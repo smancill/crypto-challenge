@@ -1,5 +1,7 @@
 #include <crypto.hpp>
 
+#include <util.hpp>
+
 #include <base64.h>
 
 #include <functional>
@@ -71,6 +73,35 @@ bytes_t fixed_xor(const bytes_t& input1, const bytes_t& input2)
     std::transform(input1.begin(), input1.end(), input2.begin(),
                    output.begin(), std::bit_xor<std::byte>());
     return output;
+}
+
+
+bytes_t single_byte_xor(const bytes_t& data, std::byte byte)
+{
+    auto encrypted = bytes_t(data.size());
+    std::transform(data.begin(), data.end(), encrypted.begin(),
+                   [byte](auto b) { return b ^ byte; });
+    return encrypted;
+}
+
+
+std::byte break_single_byte_xor(const bytes_t& encrypted_data)
+{
+    struct {
+        std::byte key{0};
+        float score{0};
+    } msg;
+
+    for (short i = 0; i < 256; ++i) {
+        auto key = std::byte{static_cast<unsigned char>(i)};
+        auto score = english_score(single_byte_xor(encrypted_data, key));
+        if (score >= msg.score) {
+            msg.key = key;
+            msg.score = score;
+        }
+    }
+
+    return msg.key;
 }
 
 } // end namespace crypto

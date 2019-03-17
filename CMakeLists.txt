@@ -37,7 +37,7 @@ add_compile_options(-Wall -Wextra)
 include(FetchContent)
 
 add_subdirectory(src/third_party)
-add_library(crypto src/crypto.cpp)
+add_library(crypto src/crypto.cpp src/util.cpp)
 target_include_directories(crypto PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_link_libraries(crypto PRIVATE base64)
@@ -49,6 +49,8 @@ macro(add_crypto_exe set ch)
   target_link_libraries(${exe_name} PRIVATE crypto)
   unset(exe_name)
 endmacro()
+
+add_crypto_exe(01 03)
 
 
 enable_testing()

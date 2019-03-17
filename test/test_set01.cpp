@@ -51,3 +51,18 @@ TEST(Set01, Challenge02)
 
     ASSERT_THAT(bytes2hex(r), StrEq("746865206b696420646f6e277420706c6179"));
 }
+
+
+TEST(Set01, Challenge03)
+{
+    auto text = "You shall not pass!";
+    auto key = std::byte{'G'};
+
+    auto encrypted = single_byte_xor(str2bytes(text), key);
+
+    auto decrypted_key = break_single_byte_xor(encrypted);
+    auto decrypted = single_byte_xor(encrypted, decrypted_key);
+
+    ASSERT_THAT(decrypted_key, Eq(key));
+    ASSERT_THAT(bytes2str(decrypted), StrEq(text));
+}
