@@ -66,3 +66,17 @@ TEST(Set01, Challenge03)
     ASSERT_THAT(decrypted_key, Eq(key));
     ASSERT_THAT(bytes2str(decrypted), StrEq(text));
 }
+
+
+TEST(Set01, Challenge05)
+{
+    auto input = "Burning 'em, if you ain't quick and nimble\n"
+                 "I go crazy when I hear a cymbal";
+    auto key = "ICE";
+    auto enc = repeated_key_xor(str2bytes(input), str2bytes(key));
+
+    ASSERT_THAT(bytes2hex(enc),
+                StrEq("0b3637272a2b2e63622c2e69692a23693a2a3c6324202d62"
+                      "3d63343c2a26226324272765272a282b2f20430a652e2c65"
+                      "2a3124333a653e2b2027630c692b20283165286326302e27282f"));
+}

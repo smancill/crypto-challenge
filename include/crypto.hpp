@@ -26,6 +26,8 @@ bytes_t fixed_xor(const bytes_t& input1, const bytes_t& input2);
 
 bytes_t single_byte_xor(const bytes_t& data, std::byte key);
 
+bytes_t repeated_key_xor(const bytes_t& data, const bytes_t& key);
+
 std::byte break_single_byte_xor(const bytes_t& encrypted_data);
 
 } // end namespace crypto

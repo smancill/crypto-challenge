@@ -85,6 +85,16 @@ bytes_t single_byte_xor(const bytes_t& data, std::byte byte)
 }
 
 
+bytes_t repeated_key_xor(const bytes_t& data, const bytes_t& key)
+{
+    auto encrypted = bytes_t(data.size());
+    for (size_t i = 0, j = 0; i != data.size(); ++i) {
+        encrypted[i] = data[i] ^ key[j++ % key.size()];
+    }
+    return encrypted;
+}
+
+
 std::byte break_single_byte_xor(const bytes_t& encrypted_data)
 {
     struct {
