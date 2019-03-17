@@ -41,3 +41,13 @@ TEST(Set01, Challenge01)
         StrEq("SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t")
     );
 }
+
+
+TEST(Set01, Challenge02)
+{
+    auto b1 = hex2bytes("1c0111001f010100061a024b53535009181c");
+    auto b2 = hex2bytes("686974207468652062756c6c277320657965");
+    auto r = fixed_xor(b1, b2);
+
+    ASSERT_THAT(bytes2hex(r), StrEq("746865206b696420646f6e277420706c6179"));
+}

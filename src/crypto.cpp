@@ -2,6 +2,7 @@
 
 #include <base64.h>
 
+#include <functional>
 #include <iomanip>
 #include <sstream>
 
@@ -61,6 +62,15 @@ std::string base64_encode(const bytes_t& data)
 bytes_t base64_decode(const std::string& encoded_text)
 {
     return str2bytes(::base64_decode(encoded_text));
+}
+
+
+bytes_t fixed_xor(const bytes_t& input1, const bytes_t& input2)
+{
+    auto output = bytes_t(input1.size());
+    std::transform(input1.begin(), input1.end(), input2.begin(),
+                   output.begin(), std::bit_xor<std::byte>());
+    return output;
 }
 
 } // end namespace crypto

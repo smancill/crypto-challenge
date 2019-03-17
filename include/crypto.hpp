@@ -22,6 +22,8 @@ std::string base64_encode(const bytes_t& data);
 
 bytes_t base64_decode(const std::string& encoded_text);
 
+bytes_t fixed_xor(const bytes_t& input1, const bytes_t& input2);
+
 } // end namespace crypto
 
 #endif
