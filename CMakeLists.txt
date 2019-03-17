@@ -36,9 +36,11 @@ add_compile_options(-Wall -Wextra)
 
 include(FetchContent)
 
+add_subdirectory(src/third_party)
 add_library(crypto src/crypto.cpp)
 target_include_directories(crypto PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+target_link_libraries(crypto PRIVATE base64)
 
 
 macro(add_crypto_exe set ch)

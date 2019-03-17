@@ -30,3 +30,14 @@ TEST(Set01, BytesToString)
     ASSERT_THAT(str2bytes(str), ContainerEq(bytes));
     ASSERT_THAT(bytes2str(bytes), StrEq(str));
 }
+
+
+TEST(Set01, Challenge01)
+{
+    auto data = hex2bytes("49276d206b696c6c696e6720796f757220627261696e206c"
+                          "696b65206120706f69736f6e6f7573206d757368726f6f6d");
+    ASSERT_THAT(
+        base64_encode(data),
+        StrEq("SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t")
+    );
+}

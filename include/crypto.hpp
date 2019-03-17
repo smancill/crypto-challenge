@@ -18,6 +18,10 @@ bytes_t str2bytes(std::string_view text);
 
 std::string bytes2str(const bytes_t& data);
 
+std::string base64_encode(const bytes_t& data);
+
+bytes_t base64_decode(const std::string& encoded_text);
+
 } // end namespace crypto
 
 #endif

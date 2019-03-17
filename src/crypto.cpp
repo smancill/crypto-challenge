@@ -1,5 +1,7 @@
 #include <crypto.hpp>
 
+#include <base64.h>
+
 #include <iomanip>
 #include <sstream>
 
@@ -46,6 +48,19 @@ bytes_t str2bytes(std::string_view text)
 std::string bytes2str(const bytes_t& data)
 {
     return {reinterpret_cast<const char*>(data.data()), data.size()};
+}
+
+
+std::string base64_encode(const bytes_t& data)
+{
+    return ::base64_encode(reinterpret_cast<const unsigned char*>(data.data()),
+                           data.size());
+}
+
+
+bytes_t base64_decode(const std::string& encoded_text)
+{
+    return str2bytes(::base64_decode(encoded_text));
 }
 
 } // end namespace crypto
