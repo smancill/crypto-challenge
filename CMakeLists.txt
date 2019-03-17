@@ -51,6 +51,7 @@ macro(add_crypto_exe set ch)
 endmacro()
 
 add_crypto_exe(01 03)
+add_crypto_exe(01 04)
 
 
 enable_testing()
