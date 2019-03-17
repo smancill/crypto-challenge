@@ -26,4 +26,18 @@ int english_score(const std::vector<std::byte>& data)
     return sum;
 }
 
+
+int hamming_distance(const bytes_t& input1, const bytes_t& input2)
+{
+    int count = 0;
+    for (size_t i = 0; i < input1.size(); i++) {
+        auto partial = std::to_integer<int>(input1[i] ^ input2[i]);
+        while (partial > 0) {
+            count += partial & 1;
+            partial = partial >> 1;
+        }
+    }
+    return count;
+}
+
 } // end namespace crypto

@@ -30,6 +30,8 @@ bytes_t repeated_key_xor(const bytes_t& data, const bytes_t& key);
 
 std::byte break_single_byte_xor(const bytes_t& encrypted_data);
 
+bytes_t break_repeated_key_xor(const bytes_t& encrypted_data);
+
 } // end namespace crypto
 
 #endif

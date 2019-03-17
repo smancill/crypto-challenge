@@ -1,4 +1,5 @@
 #include <crypto.hpp>
+#include <util.hpp>
 
 #include <gmock/gmock.h>
 
@@ -79,4 +80,71 @@ TEST(Set01, Challenge05)
                 StrEq("0b3637272a2b2e63622c2e69692a23693a2a3c6324202d62"
                       "3d63343c2a26226324272765272a282b2f20430a652e2c65"
                       "2a3124333a653e2b2027630c692b20283165286326302e27282f"));
+}
+
+
+TEST(Set01, HammingDistance)
+{
+    auto s1 = str2bytes("this is a test");
+    auto s2 = str2bytes("wokka wokka!!!");
+
+    ASSERT_THAT(hamming_distance(s1, s2), Eq(37));
+}
+
+
+namespace crypto {
+    std::vector<bytes_t> get_key_blocks(const bytes_t& data, size_t key_size);
+}
+
+TEST(Set01, GetKeyBlocks)
+{
+    {
+        auto text = "ABCDEABCDEABCDEABC";
+        auto blocks = get_key_blocks(str2bytes(text), 5);
+
+        ASSERT_THAT(blocks.size(), Eq(5));
+        ASSERT_THAT(bytes2str(blocks[0]), StrEq("AAAA"));
+        ASSERT_THAT(bytes2str(blocks[1]), StrEq("BBBB"));
+        ASSERT_THAT(bytes2str(blocks[2]), StrEq("CCCC"));
+        ASSERT_THAT(bytes2str(blocks[3]), StrEq("DDD"));
+        ASSERT_THAT(bytes2str(blocks[4]), StrEq("EEE"));
+    }
+
+    {
+        auto text = "123123";
+        auto blocks = get_key_blocks(str2bytes(text), 3);
+
+        ASSERT_THAT(blocks.size(), Eq(3));
+        ASSERT_THAT(bytes2str(blocks[0]), StrEq("11"));
+        ASSERT_THAT(bytes2str(blocks[1]), StrEq("22"));
+        ASSERT_THAT(bytes2str(blocks[2]), StrEq("33"));
+    }
+}
+
+
+TEST(Set01, BreakRepeatedKeyXOR)
+{
+    auto text = "The world is changed. I feel it in the water. I feel it in "
+        "the earth. I smell it in the air. Much that once was, is lost. For "
+        "none now live, who remember it. It began with the forging of the "
+        "Great Rings. Three were given to the Elves, immortal, wisest and "
+        "fairest of all beings. Seven, to the Dwarf lords, great miners and "
+        "craftsmen of the mountain halls. And nine, nine rings were gifted to "
+        "the race of Men, who above all else, desire power. For within these "
+        "Rings was bound the strength and will to govern each race. But they "
+        "were all of them, deceived. For another ring was made. In the land "
+        "of Mordor, in the fires of Mount Doom, the dark lord Sauron forged "
+        "in secret a master ring to control all others. And into this ring, "
+        "he poured his cruelty, his malice and his will to dominate all life. "
+        "One Ring to rule them all...";
+
+    auto key = "Annon edhellen";
+
+    auto encrypted = repeated_key_xor(str2bytes(text), str2bytes(key));
+
+    auto decrypted_key = break_repeated_key_xor(encrypted);
+    auto decrypted_text = repeated_key_xor(encrypted, decrypted_key);
+
+    ASSERT_THAT(bytes2str(decrypted_key), StrEq(key));
+    ASSERT_THAT(bytes2str(decrypted_text), StrEq(text));
 }

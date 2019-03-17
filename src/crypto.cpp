@@ -114,4 +114,86 @@ std::byte break_single_byte_xor(const bytes_t& encrypted_data)
     return msg.key;
 }
 
+
+static std::vector<size_t> find_best_key_sizes(
+        const bytes_t& input,
+        size_t hamming_blocks = 4,
+        size_t min_size = 2,
+        size_t max_size = 40)
+{
+    struct Key {
+        size_t key_size;
+        float norm_dist;
+    };
+    auto hamming_dists = std::vector<Key>{};
+
+    for (size_t key_size = min_size; key_size <= max_size; ++key_size) {
+        auto blocks = std::vector<bytes_t>{};
+        for (size_t i = 0; i < hamming_blocks * key_size; i += key_size) {
+            blocks.emplace_back(input.begin() + i, input.begin() + i + key_size);
+        }
+
+        float dist = 0;
+        for (size_t i = 1; i < hamming_blocks - 1; ++i) {
+            for (size_t j = i + 1; j < hamming_blocks; ++j) {
+                dist += hamming_distance(blocks[i], blocks[j]);
+            }
+        }
+        float norm_dist = dist / hamming_blocks / key_size;
+
+        hamming_dists.push_back({key_size, norm_dist});
+    }
+
+    std::sort(hamming_dists.begin(), hamming_dists.end(),
+        [](auto const& a, auto const& b) { return a.norm_dist < b.norm_dist; }
+    );
+
+    auto const max_keys = 3;
+    auto best_key_sizes = std::vector<size_t>(max_keys);
+    std::transform(hamming_dists.begin(), hamming_dists.begin() + max_keys,
+                   best_key_sizes.begin(),
+                   [](auto const& i) { return i.key_size; });
+
+    return best_key_sizes;
+}
+
+
+std::vector<bytes_t> get_key_blocks(const bytes_t& data, size_t key_size)
+{
+    auto blocks = std::vector<bytes_t>(key_size);
+    for (size_t i = 0; i < key_size; ++i) {
+        for (size_t j = i; j < data.size(); j += key_size) {
+            blocks[i].push_back(data[j]);
+        }
+    }
+    return blocks;
+}
+
+
+bytes_t break_repeated_key_xor(const bytes_t& encrypted_data)
+{
+    struct {
+        bytes_t key;
+        float score;
+    } best_key{};
+
+    for (auto key_size : find_best_key_sizes(encrypted_data)) {
+        auto decryption_key = bytes_t{};
+        for (auto const& block : get_key_blocks(encrypted_data, key_size)) {
+            auto key_byte = break_single_byte_xor(block);
+            decryption_key.push_back(key_byte);
+        }
+
+        auto decrypted = repeated_key_xor(encrypted_data, decryption_key);
+        auto score = english_score(decrypted);
+
+        if (score >= best_key.score) {
+            best_key.score = score;
+            best_key.key = std::move(decryption_key);
+        }
+    }
+
+    return best_key.key;
+}
+
 } // end namespace crypto

@@ -52,6 +52,7 @@ endmacro()
 
 add_crypto_exe(01 03)
 add_crypto_exe(01 04)
+add_crypto_exe(01 06)
 
 
 enable_testing()
