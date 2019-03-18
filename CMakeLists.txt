@@ -36,11 +36,13 @@ add_compile_options(-Wall -Wextra)
 
 include(FetchContent)
 
+find_package(OpenSSL REQUIRED)
+
 add_subdirectory(src/third_party)
 add_library(crypto src/crypto.cpp src/util.cpp)
 target_include_directories(crypto PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
-target_link_libraries(crypto PRIVATE base64)
+target_link_libraries(crypto PRIVATE base64 OpenSSL::Crypto)
 
 
 macro(add_crypto_exe set ch)
@@ -53,6 +55,7 @@ endmacro()
 add_crypto_exe(01 03)
 add_crypto_exe(01 04)
 add_crypto_exe(01 06)
+add_crypto_exe(01 07)
 
 
 enable_testing()

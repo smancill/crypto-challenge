@@ -4,9 +4,13 @@
 
 #include <base64.h>
 
+#include <openssl/err.h>
+#include <openssl/evp.h>
+
 #include <functional>
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
 
 namespace {
@@ -19,6 +23,18 @@ inline const unsigned char* buffer(const std::byte* ptr)
 inline unsigned char* buffer(std::byte* ptr)
 {
     return reinterpret_cast<unsigned char*>(ptr);
+}
+
+
+void openssl_error(std::string msg)
+{
+    auto buf = std::make_unique<char[]>(40);
+    auto err = ERR_get_error();
+
+    ERR_error_string_n(err, buf.get(), 40);
+    msg.append(buf.get());
+
+    throw std::runtime_error(std::move(msg));
 }
 
 }
@@ -209,6 +225,67 @@ bytes_t break_repeated_key_xor(const bytes_t& encrypted_data)
     }
 
     return best_key.key;
+}
+
+
+bytes_t decrypt_aes_ecb(const bytes_t& encrypted_data,
+                        const bytes_t& key,
+                        int bits)
+{
+    class Decrypter {
+    public:
+        explicit Decrypter(const bytes_t& key, int bits)
+        {
+            EVP_DecryptInit_ex(ctx, get_cipher(bits), nullptr,
+                    buffer(key.data()), nullptr);
+        }
+
+        bytes_t decrypt(const bytes_t& encrypted)
+        {
+            auto decrypted = bytes_t(encrypted.size());
+
+            int total = 0;
+            int len;
+
+            if (!EVP_DecryptUpdate(ctx, buffer(decrypted.data()), &len,
+                    buffer(encrypted.data()), encrypted.size())) {
+                openssl_error("openssl aes+ecb decryption error: ");
+            }
+            total += len;
+
+            if (!EVP_DecryptFinal_ex(ctx, buffer(&decrypted[total]), &len)) {
+                openssl_error("openssl aes+ecb decryption error: ");
+            }
+            total += len;
+
+            decrypted.resize(total);
+            return decrypted;
+        }
+
+        ~Decrypter() {
+            EVP_CIPHER_CTX_free(ctx);
+        }
+
+    private:
+        const EVP_CIPHER* get_cipher(int bits)
+        {
+            switch (bits) {
+                case 128:
+                    return EVP_aes_128_ecb();
+                case 192:
+                    return EVP_aes_192_ecb();
+                case 256:
+                    return EVP_aes_256_ecb();
+                default:
+                    throw std::invalid_argument("unsupported bits");
+            }
+        }
+
+    private:
+        EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    };
+
+    return Decrypter(key, bits).decrypt(encrypted_data);
 }
 
 } // end namespace crypto

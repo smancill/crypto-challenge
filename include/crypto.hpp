@@ -32,6 +32,9 @@ std::byte break_single_byte_xor(const bytes_t& encrypted_data);
 
 bytes_t break_repeated_key_xor(const bytes_t& encrypted_data);
 
+bytes_t decrypt_aes_ecb(const bytes_t& encrypted_data, const bytes_t& key,
+                        int bits = 128);
+
 } // end namespace crypto
 
 #endif
