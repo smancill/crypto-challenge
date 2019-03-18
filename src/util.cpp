@@ -1,8 +1,20 @@
 #include <util.hpp>
 
+#include <fstream>
 #include <map>
 
 namespace crypto::util {
+
+std::string read_base64_file(const std::string& name)
+{
+    std::ifstream input{name};
+    std::string data;
+    for (std::string line; std::getline(input, line); ) {
+        data.append(line);
+    }
+    return data;
+}
+
 
 int english_score(const std::vector<std::byte>& data)
 {

@@ -8,6 +8,22 @@
 #include <iomanip>
 #include <sstream>
 
+
+namespace {
+
+inline const unsigned char* buffer(const std::byte* ptr)
+{
+    return reinterpret_cast<const unsigned char*>(ptr);
+}
+
+inline unsigned char* buffer(std::byte* ptr)
+{
+    return reinterpret_cast<unsigned char*>(ptr);
+}
+
+}
+
+
 namespace crypto {
 
 bytes_t hex2bytes(std::string_view hex_data)
@@ -56,8 +72,7 @@ std::string bytes2str(const bytes_t& data)
 
 std::string base64_encode(const bytes_t& data)
 {
-    return ::base64_encode(reinterpret_cast<const unsigned char*>(data.data()),
-                           data.size());
+    return ::base64_encode(buffer(data.data()), data.size());
 }
 
 

@@ -3,7 +3,6 @@
 #include <util.hpp>
 
 #include <iostream>
-#include <fstream>
 
 int main(int argc, char**argv)
 {
@@ -12,13 +11,8 @@ int main(int argc, char**argv)
         return 1;
     }
 
-    std::ifstream input{argv[1]};
-    std::string b64_str;
-    for (std::string line; std::getline(input, line); ) {
-        b64_str.append(line);
-    }
-
-    auto enc_msg = crypto::base64_decode(b64_str);
+    auto b64_msg = crypto::util::read_base64_file(argv[1]);
+    auto enc_msg = crypto::base64_decode(b64_msg);
 
     auto key = crypto::break_repeated_key_xor(enc_msg);
     auto msg = crypto::repeated_key_xor(enc_msg, key);
