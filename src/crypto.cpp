@@ -104,7 +104,7 @@ std::byte break_single_byte_xor(const bytes_t& encrypted_data)
 
     for (short i = 0; i < 256; ++i) {
         auto key = std::byte{static_cast<unsigned char>(i)};
-        auto score = english_score(single_byte_xor(encrypted_data, key));
+        auto score = util::english_score(single_byte_xor(encrypted_data, key));
         if (score >= msg.score) {
             msg.key = key;
             msg.score = score;
@@ -136,7 +136,7 @@ static std::vector<size_t> find_best_key_sizes(
         float dist = 0;
         for (size_t i = 1; i < hamming_blocks - 1; ++i) {
             for (size_t j = i + 1; j < hamming_blocks; ++j) {
-                dist += hamming_distance(blocks[i], blocks[j]);
+                dist += util::hamming_distance(blocks[i], blocks[j]);
             }
         }
         float norm_dist = dist / hamming_blocks / key_size;
@@ -185,7 +185,7 @@ bytes_t break_repeated_key_xor(const bytes_t& encrypted_data)
         }
 
         auto decrypted = repeated_key_xor(encrypted_data, decryption_key);
-        auto score = english_score(decrypted);
+        auto score = util::english_score(decrypted);
 
         if (score >= best_key.score) {
             best_key.score = score;

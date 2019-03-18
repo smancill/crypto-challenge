@@ -3,11 +3,7 @@
 
 #include <crypto.hpp>
 
-#include <cstddef>
-#include <vector>
-#include <string_view>
-
-namespace crypto {
+namespace crypto::util {
 
 int english_score(const std::vector<std::byte>& data);
 

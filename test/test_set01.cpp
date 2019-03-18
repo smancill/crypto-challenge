@@ -88,7 +88,7 @@ TEST(Set01, HammingDistance)
     auto s1 = str2bytes("this is a test");
     auto s2 = str2bytes("wokka wokka!!!");
 
-    ASSERT_THAT(hamming_distance(s1, s2), Eq(37));
+    ASSERT_THAT(util::hamming_distance(s1, s2), Eq(37));
 }
 
 

@@ -2,7 +2,7 @@
 
 #include <map>
 
-namespace crypto {
+namespace crypto::util {
 
 int english_score(const std::vector<std::byte>& data)
 {
@@ -40,4 +40,4 @@ int hamming_distance(const bytes_t& input1, const bytes_t& input2)
     return count;
 }
 
-} // end namespace crypto
+} // end namespace crypto::util
