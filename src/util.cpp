@@ -17,7 +17,7 @@ std::string read_base64_file(const std::string& name)
 }
 
 
-int english_score(const std::vector<std::byte>& data)
+float english_score(const std::vector<std::byte>& data)
 {
     static const auto freq = std::map<char, float>{
         {'a', .08167}, {'b', .01492}, {'c', .02782}, {'d', .04253},

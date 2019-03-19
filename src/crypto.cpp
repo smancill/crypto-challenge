@@ -34,7 +34,7 @@ void openssl_error(std::string msg)
     ERR_error_string_n(err, buf.get(), 40);
     msg.append(buf.get());
 
-    throw std::runtime_error(std::move(msg));
+    throw std::runtime_error(msg);
 }
 
 }
@@ -102,16 +102,16 @@ bytes_t fixed_xor(const bytes_t& input1, const bytes_t& input2)
 {
     auto output = bytes_t(input1.size());
     std::transform(input1.begin(), input1.end(), input2.begin(),
-                   output.begin(), std::bit_xor<std::byte>());
+                   output.begin(), std::bit_xor<>());
     return output;
 }
 
 
-bytes_t single_byte_xor(const bytes_t& data, std::byte byte)
+bytes_t single_byte_xor(const bytes_t& data, std::byte key)
 {
     auto encrypted = bytes_t(data.size());
     std::transform(data.begin(), data.end(), encrypted.begin(),
-                   [byte](auto b) { return b ^ byte; });
+                   [key](auto byte) { return byte ^ key; });
     return encrypted;
 }
 
