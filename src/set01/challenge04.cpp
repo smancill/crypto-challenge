@@ -26,7 +26,7 @@ int main(int argc, char**argv)
             auto key = std::byte{static_cast<unsigned char>(i)};
             auto decrypted = crypto::single_byte_xor(encrypted, key);
             auto score = crypto::util::english_score(decrypted);
-            if (score >= msg.score) {
+            if (score > msg.score) {
                 msg.data = std::move(decrypted);
                 msg.key = key;
                 msg.score = score;

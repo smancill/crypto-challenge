@@ -136,7 +136,7 @@ std::byte break_single_byte_xor(const bytes_t& encrypted_data)
     for (short i = 0; i < 256; ++i) {
         auto key = std::byte{static_cast<unsigned char>(i)};
         auto score = util::english_score(single_byte_xor(encrypted_data, key));
-        if (score >= msg.score) {
+        if (score > msg.score) {
             msg.key = key;
             msg.score = score;
         }
@@ -218,7 +218,7 @@ bytes_t break_repeated_key_xor(const bytes_t& encrypted_data)
         auto decrypted = repeated_key_xor(encrypted_data, decryption_key);
         auto score = util::english_score(decrypted);
 
-        if (score >= best_key.score) {
+        if (score > best_key.score) {
             best_key.score = score;
             best_key.key = std::move(decryption_key);
         }
