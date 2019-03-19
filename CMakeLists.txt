@@ -71,3 +71,4 @@ macro(add_crypto_test set)
 endmacro()
 
 add_crypto_test(01)
+add_crypto_test(02)

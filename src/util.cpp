@@ -1,5 +1,6 @@
 #include <util.hpp>
 
+#include <algorithm>
 #include <fstream>
 #include <map>
 
@@ -50,6 +51,23 @@ int hamming_distance(const bytes_t& input1, const bytes_t& input2)
         }
     }
     return count;
+}
+
+
+void pkcs_pad(bytes_t& block, unsigned char block_size)
+{
+    unsigned char pad = block_size - (block.size() % block_size);
+    if (pad == 0) {
+        pad = block_size;
+    }
+    std::fill_n(std::back_inserter(block), pad, static_cast<std::byte>(pad));
+}
+
+
+void pkcs_unpad(bytes_t& block)
+{
+    auto pad = std::to_integer<unsigned char>(block.back());
+    block.resize(block.size() - pad);
 }
 
 } // end namespace crypto::util

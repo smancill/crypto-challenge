@@ -11,6 +11,11 @@ int english_score(const std::vector<std::byte>& data);
 
 int hamming_distance(const bytes_t& input1, const bytes_t& input2);
 
+
+void pkcs_pad(bytes_t& block, unsigned char block_size);
+
+void pkcs_unpad(bytes_t& block);
+
 } // end namespace crypto
 
 #endif
