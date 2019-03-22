@@ -37,3 +37,20 @@ TEST(Set02, Padding)
         ASSERT_THAT(data, str2bytes("\x1a\x1b\x1c"));
     }
 }
+
+
+TEST(Set02, OpenSslEcbEncryption)
+{
+    auto msg = "I wish the Ring had never come to me. "
+               "I wish none of this had happened.";
+
+    auto key = "0123456789012345";
+
+    auto enc_msg = encrypt_aes_ecb(str2bytes(msg), str2bytes(key));
+    ASSERT_THAT(enc_msg.size(), Eq(80));
+
+    auto dec_msg = decrypt_aes_ecb(enc_msg, str2bytes(key));
+    ASSERT_THAT(dec_msg.size(), Eq(71));
+
+    ASSERT_THAT(bytes2str(dec_msg), StrEq(msg));
+}

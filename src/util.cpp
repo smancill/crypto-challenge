@@ -70,4 +70,19 @@ void pkcs_unpad(byte_buffer& block)
     block.resize(block.size() - pad);
 }
 
+
+std::vector<byte_view> split_into_blocks(byte_view data, size_t block_size)
+{
+    auto blocks = std::vector<byte_view>{};
+    size_t i = 0;
+    while (i <= data.size() - block_size) {
+        blocks.emplace_back(&data[i], block_size);
+        i += block_size;
+    }
+    if (i < data.size()) {
+        blocks.emplace_back(&data[i], data.size() - i);
+    }
+    return blocks;
+}
+
 } // end namespace crypto::util

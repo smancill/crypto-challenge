@@ -2,42 +2,14 @@
 
 #include <util.hpp>
 
-#include <base64.h>
+#include "wrappers.hpp"
 
-#include <openssl/err.h>
-#include <openssl/evp.h>
+#include <base64.h>
 
 #include <functional>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
-
-
-namespace {
-
-inline const unsigned char* buffer(const crypto::byte_t* ptr)
-{
-    return reinterpret_cast<const unsigned char*>(ptr);
-}
-
-inline unsigned char* buffer(crypto::byte_t* ptr)
-{
-    return reinterpret_cast<unsigned char*>(ptr);
-}
-
-
-void openssl_error(std::string msg)
-{
-    auto buf = std::make_unique<char[]>(40);
-    auto err = ERR_get_error();
-
-    ERR_error_string_n(err, buf.get(), 40);
-    msg.append(buf.get());
-
-    throw std::runtime_error(msg);
-}
-
-}
 
 
 namespace crypto {
@@ -88,7 +60,7 @@ std::string bytes2str(byte_view data)
 
 std::string base64_encode(byte_view data)
 {
-    return ::base64_encode(buffer(data.data()), data.size());
+    return ::base64_encode(buffer(data), data.size());
 }
 
 
@@ -228,64 +200,17 @@ byte_buffer break_repeated_key_xor(byte_view encrypted_data)
 }
 
 
-byte_buffer decrypt_aes_ecb(byte_view encrypted_data,
-                            byte_view key,
-                            int bits)
+byte_buffer encrypt_aes_ecb(byte_view data, byte_view key, int bits)
 {
-    class Decrypter {
-    public:
-        explicit Decrypter(byte_view key, int bits)
-        {
-            EVP_DecryptInit_ex(ctx, get_cipher(bits), nullptr,
-                    buffer(key.data()), nullptr);
-        }
+    return openssl::ecb_cipher(openssl::CipherAction::encrypt,
+                               data, key, bits);
+}
 
-        byte_buffer decrypt(byte_view encrypted)
-        {
-            auto decrypted = byte_buffer(encrypted.size());
 
-            int total = 0;
-            int len;
-
-            if (!EVP_DecryptUpdate(ctx, buffer(decrypted.data()), &len,
-                    buffer(encrypted.data()), encrypted.size())) {
-                openssl_error("openssl aes+ecb decryption error: ");
-            }
-            total += len;
-
-            if (!EVP_DecryptFinal_ex(ctx, buffer(&decrypted[total]), &len)) {
-                openssl_error("openssl aes+ecb decryption error: ");
-            }
-            total += len;
-
-            decrypted.resize(total);
-            return decrypted;
-        }
-
-        ~Decrypter() {
-            EVP_CIPHER_CTX_free(ctx);
-        }
-
-    private:
-        const EVP_CIPHER* get_cipher(int bits)
-        {
-            switch (bits) {
-                case 128:
-                    return EVP_aes_128_ecb();
-                case 192:
-                    return EVP_aes_192_ecb();
-                case 256:
-                    return EVP_aes_256_ecb();
-                default:
-                    throw std::invalid_argument("unsupported bits");
-            }
-        }
-
-    private:
-        EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-    };
-
-    return Decrypter(key, bits).decrypt(encrypted_data);
+byte_buffer decrypt_aes_ecb(byte_view encrypted_data, byte_view key, int bits)
+{
+    return openssl::ecb_cipher(openssl::CipherAction::decrypt,
+                               encrypted_data, key, bits);
 }
 
 } // end namespace crypto

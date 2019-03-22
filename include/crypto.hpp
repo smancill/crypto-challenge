@@ -20,6 +20,7 @@ std::string base64_encode(byte_view data);
 
 byte_buffer base64_decode(const std::string& encoded_text);
 
+
 byte_buffer fixed_xor(byte_view input1, byte_view input2);
 
 byte_buffer single_byte_xor(byte_view data, byte_t key);
@@ -29,6 +30,10 @@ byte_buffer repeated_key_xor(byte_view data, byte_view key);
 byte_t break_single_byte_xor(byte_view encrypted_data);
 
 byte_buffer break_repeated_key_xor(byte_view encrypted_data);
+
+
+byte_buffer encrypt_aes_ecb(byte_view data, byte_view key,
+                            int bits = 128);
 
 byte_buffer decrypt_aes_ecb(byte_view encrypted_data, byte_view key,
                             int bits = 128);

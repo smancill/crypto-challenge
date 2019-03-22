@@ -39,7 +39,7 @@ include(FetchContent)
 find_package(OpenSSL REQUIRED)
 
 add_subdirectory(src/third_party)
-add_library(crypto src/crypto.cpp src/util.cpp)
+add_library(crypto src/crypto.cpp src/util.cpp src/wrappers.cpp)
 target_include_directories(crypto PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_link_libraries(crypto PRIVATE base64 OpenSSL::Crypto)

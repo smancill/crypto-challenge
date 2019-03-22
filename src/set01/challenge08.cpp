@@ -1,4 +1,5 @@
 #include <crypto.hpp>
+#include <util.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -6,22 +7,12 @@
 #include <string>
 
 using crypto::byte_buffer;
-using blocks_t = std::vector<byte_buffer>;
+using crypto::byte_view;
 
-blocks_t split_into_blocks(const byte_buffer& data, size_t block_size = 16)
+
+int count_repetitions(const std::vector<byte_view>& blocks)
 {
-    auto blocks = blocks_t{};
-    for (size_t i = 0; i < data.size() - block_size; i += block_size) {
-        blocks.emplace_back(data.begin() + i, data.begin() + i + block_size);
-    }
-    return blocks;
-}
-
-
-
-int count_repetitions(const blocks_t& blocks)
-{
-    auto unique_blocks = std::set<byte_buffer>{blocks.begin(), blocks.end()};
+    auto unique_blocks = std::set<byte_view>{blocks.begin(), blocks.end()};
     return blocks.size() - unique_blocks.size();
 }
 
@@ -43,7 +34,8 @@ int main(int argc, char** argv)
     for (std::string line; std::getline(input, line); ) {
         ++counter;
         auto data = crypto::hex2bytes(line);
-        auto reps = count_repetitions(split_into_blocks(data));
+        auto blocks = crypto::util::split_into_blocks(data, 16);
+        auto reps = count_repetitions(blocks);
         if (reps > text.reps) {
             text.line = counter;
             text.reps = reps;
