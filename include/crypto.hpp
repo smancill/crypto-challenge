@@ -1,39 +1,38 @@
-#ifndef CRYPTO_CRYPTO_HPP_
-#define CRYPTO_CRYPTO_HPP_
+#ifndef CRYPTO_CHALLENGE_CRYPTO_HPP_
+#define CRYPTO_CHALLENGE_CRYPTO_HPP_
 
-#include <cstddef>
+#include "types.hpp"
+
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace crypto {
 
-using bytes_t = std::vector<std::byte>;
+byte_buffer hex2bytes(std::string_view hex_data);
 
-bytes_t hex2bytes(std::string_view hex_data);
+std::string bytes2hex(const byte_buffer& data);
 
-std::string bytes2hex(const bytes_t& data);
+byte_buffer str2bytes(std::string_view text);
 
-bytes_t str2bytes(std::string_view text);
+std::string bytes2str(const byte_buffer& data);
 
-std::string bytes2str(const bytes_t& data);
+std::string base64_encode(const byte_buffer& data);
 
-std::string base64_encode(const bytes_t& data);
+byte_buffer base64_decode(const std::string& encoded_text);
 
-bytes_t base64_decode(const std::string& encoded_text);
+byte_buffer fixed_xor(const byte_buffer& input1, const byte_buffer& input2);
 
-bytes_t fixed_xor(const bytes_t& input1, const bytes_t& input2);
+byte_buffer single_byte_xor(const byte_buffer& data, byte_t key);
 
-bytes_t single_byte_xor(const bytes_t& data, std::byte key);
+byte_buffer repeated_key_xor(const byte_buffer& data, const byte_buffer& key);
 
-bytes_t repeated_key_xor(const bytes_t& data, const bytes_t& key);
+byte_t break_single_byte_xor(const byte_buffer& encrypted_data);
 
-std::byte break_single_byte_xor(const bytes_t& encrypted_data);
+byte_buffer break_repeated_key_xor(const byte_buffer& encrypted_data);
 
-bytes_t break_repeated_key_xor(const bytes_t& encrypted_data);
-
-bytes_t decrypt_aes_ecb(const bytes_t& encrypted_data, const bytes_t& key,
-                        int bits = 128);
+byte_buffer decrypt_aes_ecb(const byte_buffer& encrypted_data,
+                            const byte_buffer& key,
+                            int bits = 128);
 
 } // end namespace crypto
 

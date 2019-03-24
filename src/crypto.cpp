@@ -15,12 +15,12 @@
 
 namespace {
 
-inline const unsigned char* buffer(const std::byte* ptr)
+inline const unsigned char* buffer(const crypto::byte_t* ptr)
 {
     return reinterpret_cast<const unsigned char*>(ptr);
 }
 
-inline unsigned char* buffer(std::byte* ptr)
+inline unsigned char* buffer(crypto::byte_t* ptr)
 {
     return reinterpret_cast<unsigned char*>(ptr);
 }
@@ -42,9 +42,9 @@ void openssl_error(std::string msg)
 
 namespace crypto {
 
-bytes_t hex2bytes(std::string_view hex_data)
+byte_buffer hex2bytes(std::string_view hex_data)
 {
-    auto bin_data = bytes_t{};
+    auto bin_data = byte_buffer{};
     bin_data.reserve(hex_data.size() / 2);
 
     char b[] = "00";
@@ -52,14 +52,14 @@ bytes_t hex2bytes(std::string_view hex_data)
         b[0] = hex_data[i];
         b[1] = hex_data[i+1];
         auto n = std::stoul(b, nullptr, 16);
-        bin_data.push_back(static_cast<std::byte>(n));
+        bin_data.push_back(static_cast<byte_t>(n));
     }
 
     return bin_data;
 }
 
 
-std::string bytes2hex(const bytes_t& data)
+std::string bytes2hex(const byte_buffer& data)
 {
     auto ss = std::stringstream{};
     ss << std::hex;
@@ -70,55 +70,55 @@ std::string bytes2hex(const bytes_t& data)
 }
 
 
-bytes_t str2bytes(std::string_view text)
+byte_buffer str2bytes(std::string_view text)
 {
-    auto bytes = bytes_t{};
+    auto bytes = byte_buffer{};
     for (auto c : text) {
-        bytes.push_back(static_cast<std::byte>(c));
+        bytes.push_back(static_cast<byte_t>(c));
     }
     return bytes;
 }
 
 
-std::string bytes2str(const bytes_t& data)
+std::string bytes2str(const byte_buffer& data)
 {
     return {reinterpret_cast<const char*>(data.data()), data.size()};
 }
 
 
-std::string base64_encode(const bytes_t& data)
+std::string base64_encode(const byte_buffer& data)
 {
     return ::base64_encode(buffer(data.data()), data.size());
 }
 
 
-bytes_t base64_decode(const std::string& encoded_text)
+byte_buffer base64_decode(const std::string& encoded_text)
 {
     return str2bytes(::base64_decode(encoded_text));
 }
 
 
-bytes_t fixed_xor(const bytes_t& input1, const bytes_t& input2)
+byte_buffer fixed_xor(const byte_buffer& input1, const byte_buffer& input2)
 {
-    auto output = bytes_t(input1.size());
+    auto output = byte_buffer(input1.size());
     std::transform(input1.begin(), input1.end(), input2.begin(),
                    output.begin(), std::bit_xor<>());
     return output;
 }
 
 
-bytes_t single_byte_xor(const bytes_t& data, std::byte key)
+byte_buffer single_byte_xor(const byte_buffer& data, byte_t key)
 {
-    auto encrypted = bytes_t(data.size());
+    auto encrypted = byte_buffer(data.size());
     std::transform(data.begin(), data.end(), encrypted.begin(),
                    [key](auto byte) { return byte ^ key; });
     return encrypted;
 }
 
 
-bytes_t repeated_key_xor(const bytes_t& data, const bytes_t& key)
+byte_buffer repeated_key_xor(const byte_buffer& data, const byte_buffer& key)
 {
-    auto encrypted = bytes_t(data.size());
+    auto encrypted = byte_buffer(data.size());
     for (size_t i = 0, j = 0; i != data.size(); ++i) {
         encrypted[i] = data[i] ^ key[j++ % key.size()];
     }
@@ -126,15 +126,15 @@ bytes_t repeated_key_xor(const bytes_t& data, const bytes_t& key)
 }
 
 
-std::byte break_single_byte_xor(const bytes_t& encrypted_data)
+byte_t break_single_byte_xor(const byte_buffer& encrypted_data)
 {
     struct {
-        std::byte key{0};
+        byte_t key{0};
         float score{0};
     } msg;
 
     for (short i = 0; i < 256; ++i) {
-        auto key = std::byte{static_cast<unsigned char>(i)};
+        auto key = byte_t{static_cast<unsigned char>(i)};
         auto score = util::english_score(single_byte_xor(encrypted_data, key));
         if (score > msg.score) {
             msg.key = key;
@@ -147,7 +147,7 @@ std::byte break_single_byte_xor(const bytes_t& encrypted_data)
 
 
 static std::vector<size_t> find_best_key_sizes(
-        const bytes_t& input,
+        const byte_buffer& input,
         size_t hamming_blocks = 4,
         size_t min_size = 2,
         size_t max_size = 40)
@@ -159,7 +159,7 @@ static std::vector<size_t> find_best_key_sizes(
     auto hamming_dists = std::vector<Key>{};
 
     for (size_t key_size = min_size; key_size <= max_size; ++key_size) {
-        auto blocks = std::vector<bytes_t>{};
+        auto blocks = std::vector<byte_buffer>{};
         for (size_t i = 0; i < hamming_blocks * key_size; i += key_size) {
             blocks.emplace_back(input.begin() + i, input.begin() + i + key_size);
         }
@@ -189,9 +189,9 @@ static std::vector<size_t> find_best_key_sizes(
 }
 
 
-std::vector<bytes_t> get_key_blocks(const bytes_t& data, size_t key_size)
+std::vector<byte_buffer> get_key_blocks(const byte_buffer& data, size_t key_size)
 {
-    auto blocks = std::vector<bytes_t>(key_size);
+    auto blocks = std::vector<byte_buffer>(key_size);
     for (size_t i = 0; i < key_size; ++i) {
         for (size_t j = i; j < data.size(); j += key_size) {
             blocks[i].push_back(data[j]);
@@ -201,15 +201,15 @@ std::vector<bytes_t> get_key_blocks(const bytes_t& data, size_t key_size)
 }
 
 
-bytes_t break_repeated_key_xor(const bytes_t& encrypted_data)
+byte_buffer break_repeated_key_xor(const byte_buffer& encrypted_data)
 {
     struct {
-        bytes_t key;
+        byte_buffer key;
         float score;
     } best_key{};
 
     for (auto key_size : find_best_key_sizes(encrypted_data)) {
-        auto decryption_key = bytes_t{};
+        auto decryption_key = byte_buffer{};
         for (auto const& block : get_key_blocks(encrypted_data, key_size)) {
             auto key_byte = break_single_byte_xor(block);
             decryption_key.push_back(key_byte);
@@ -228,21 +228,21 @@ bytes_t break_repeated_key_xor(const bytes_t& encrypted_data)
 }
 
 
-bytes_t decrypt_aes_ecb(const bytes_t& encrypted_data,
-                        const bytes_t& key,
-                        int bits)
+byte_buffer decrypt_aes_ecb(const byte_buffer& encrypted_data,
+                            const byte_buffer& key,
+                            int bits)
 {
     class Decrypter {
     public:
-        explicit Decrypter(const bytes_t& key, int bits)
+        explicit Decrypter(const byte_buffer& key, int bits)
         {
             EVP_DecryptInit_ex(ctx, get_cipher(bits), nullptr,
                     buffer(key.data()), nullptr);
         }
 
-        bytes_t decrypt(const bytes_t& encrypted)
+        byte_buffer decrypt(const byte_buffer& encrypted)
         {
-            auto decrypted = bytes_t(encrypted.size());
+            auto decrypted = byte_buffer(encrypted.size());
 
             int total = 0;
             int len;

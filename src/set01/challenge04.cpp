@@ -5,6 +5,9 @@
 #include <iostream>
 #include <fstream>
 
+using crypto::byte_t;
+using crypto::byte_buffer;
+
 int main(int argc, char**argv)
 {
     if (argc != 2) {
@@ -15,15 +18,15 @@ int main(int argc, char**argv)
     auto input = std::ifstream{argv[1]};
 
     struct {
-        std::vector<std::byte> data;
-        std::byte key{0};
+        byte_buffer data;
+        byte_t key{0};
         float score{0};
     } msg;
 
     for (std::string line; std::getline(input, line); ) {
         auto encrypted = crypto::hex2bytes(line);
         for (short i = 0; i < 256; ++i) {
-            auto key = std::byte{static_cast<unsigned char>(i)};
+            auto key = byte_t{static_cast<unsigned char>(i)};
             auto decrypted = crypto::single_byte_xor(encrypted, key);
             auto score = crypto::util::english_score(decrypted);
             if (score > msg.score) {

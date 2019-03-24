@@ -17,7 +17,7 @@ std::string read_base64_file(const std::string& name)
 }
 
 
-float english_score(const std::vector<std::byte>& data)
+float english_score(const byte_buffer& data)
 {
     static const auto freq = std::map<char, float>{
         {'a', .08167}, {'b', .01492}, {'c', .02782}, {'d', .04253},
@@ -40,7 +40,7 @@ float english_score(const std::vector<std::byte>& data)
 }
 
 
-int hamming_distance(const bytes_t& input1, const bytes_t& input2)
+int hamming_distance(const byte_buffer& input1, const byte_buffer& input2)
 {
     int count = 0;
     for (size_t i = 0; i < input1.size(); i++) {
@@ -54,17 +54,17 @@ int hamming_distance(const bytes_t& input1, const bytes_t& input2)
 }
 
 
-void pkcs_pad(bytes_t& block, unsigned char block_size)
+void pkcs_pad(byte_buffer& block, unsigned char block_size)
 {
     unsigned char pad = block_size - (block.size() % block_size);
     if (pad == 0) {
         pad = block_size;
     }
-    std::fill_n(std::back_inserter(block), pad, static_cast<std::byte>(pad));
+    std::fill_n(std::back_inserter(block), pad, static_cast<byte_t>(pad));
 }
 
 
-void pkcs_unpad(bytes_t& block)
+void pkcs_unpad(byte_buffer& block)
 {
     auto pad = std::to_integer<unsigned char>(block.back());
     block.resize(block.size() - pad);

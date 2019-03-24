@@ -5,11 +5,10 @@
 #include <set>
 #include <string>
 
-using crypto::bytes_t;
-using blocks_t = std::vector<bytes_t>;
+using crypto::byte_buffer;
+using blocks_t = std::vector<byte_buffer>;
 
-
-blocks_t split_into_blocks(const bytes_t& data, size_t block_size = 16)
+blocks_t split_into_blocks(const byte_buffer& data, size_t block_size = 16)
 {
     auto blocks = blocks_t{};
     for (size_t i = 0; i < data.size() - block_size; i += block_size) {
@@ -22,7 +21,7 @@ blocks_t split_into_blocks(const bytes_t& data, size_t block_size = 16)
 
 int count_repetitions(const blocks_t& blocks)
 {
-    auto unique_blocks = std::set<bytes_t>{blocks.begin(), blocks.end()};
+    auto unique_blocks = std::set<byte_buffer>{blocks.begin(), blocks.end()};
     return blocks.size() - unique_blocks.size();
 }
 

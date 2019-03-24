@@ -10,9 +10,9 @@ using namespace testing;
 TEST(Set01, BytesToHex)
 {
     auto hex = "1c0111001fd30100";
-    auto bytes = std::vector<std::byte>{
-         std::byte{0x1c}, std::byte{0x01}, std::byte{0x11}, std::byte{0x00},
-         std::byte{0x1f}, std::byte{0xd3}, std::byte{0x01}, std::byte{0x00}
+    auto bytes = byte_buffer{
+         byte_t{0x1c}, byte_t{0x01}, byte_t{0x11}, byte_t{0x00},
+         byte_t{0x1f}, byte_t{0xd3}, byte_t{0x01}, byte_t{0x00}
     };
 
     ASSERT_THAT(hex2bytes(hex), ContainerEq(bytes));
@@ -23,9 +23,9 @@ TEST(Set01, BytesToHex)
 TEST(Set01, BytesToString)
 {
     auto str = "Hello!";
-    auto bytes = std::vector<std::byte>{
-         std::byte{0x48}, std::byte{0x65}, std::byte{0x6c},
-         std::byte{0x6c}, std::byte{0x6f}, std::byte{0x21}
+    auto bytes = byte_buffer{
+         byte_t{0x48}, byte_t{0x65}, byte_t{0x6c},
+         byte_t{0x6c}, byte_t{0x6f}, byte_t{0x21}
     };
 
     ASSERT_THAT(str2bytes(str), ContainerEq(bytes));
@@ -57,7 +57,7 @@ TEST(Set01, Challenge02)
 TEST(Set01, Challenge03)
 {
     auto text = "You shall not pass!";
-    auto key = std::byte{'G'};
+    auto key = byte_t{'G'};
 
     auto encrypted = single_byte_xor(str2bytes(text), key);
 
@@ -93,7 +93,7 @@ TEST(Set01, HammingDistance)
 
 
 namespace crypto {
-    std::vector<bytes_t> get_key_blocks(const bytes_t& data, size_t key_size);
+    std::vector<byte_buffer> get_key_blocks(const byte_buffer&, size_t);
 }
 
 TEST(Set01, GetKeyBlocks)
