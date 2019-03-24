@@ -213,4 +213,86 @@ byte_buffer decrypt_aes_ecb(byte_view encrypted_data, byte_view key, int bits)
                                encrypted_data, key, bits);
 }
 
+
+static std::vector<byte_view> split_and_pad(byte_view& data,
+                                            byte_buffer& last,
+                                            size_t block_size)
+{
+    auto blocks = util::split_into_blocks(data, block_size);
+
+    if (blocks.back().size() < block_size) {
+        last.assign(blocks.back().begin(), blocks.back().end());
+        blocks.pop_back();
+    }
+    util::pkcs_pad(last, block_size);
+    blocks.push_back(last);
+
+    return blocks;
+}
+
+
+byte_buffer encrypt_aes_cbc(byte_view data, byte_view key, byte_view iv,
+                            int bits)
+{
+    auto action = openssl::CipherAction::encrypt;
+    auto encrypter =  openssl::Cipher{action, key, bits};
+    encrypter.set_padding(false);
+
+    auto size = static_cast<size_t>(bits) / 8;
+    auto last = byte_buffer{};
+    auto blocks = split_and_pad(data, last, size);
+
+    auto enc_data = byte_buffer(size * blocks.size() + EVP_MAX_BLOCK_LENGTH);
+
+    auto out_span = byte_span{enc_data.data(), enc_data.capacity()};
+    auto prev_block = iv;
+    auto total = 0;
+    for (const auto& block : blocks) {
+        auto input_block = repeated_key_xor(block, prev_block);
+        auto len = encrypter.update(input_block, out_span);
+        prev_block = out_span.first(len);
+        out_span = out_span.subspan(len);
+        total += len;
+    }
+    encrypter.finalize(out_span);
+
+    enc_data.resize(total);
+
+    return enc_data;
+}
+
+
+byte_buffer decrypt_aes_cbc(byte_view encrypted_data,
+                            byte_view key,
+                            byte_view iv,
+                            int bits)
+{
+    auto action = openssl::CipherAction::decrypt;
+    auto decrypter =  openssl::Cipher{action, key, bits};
+    decrypter.set_padding(false);
+
+    auto size = static_cast<size_t>(bits) / 8;
+    auto blocks = util::split_into_blocks(encrypted_data, size);
+
+    auto dec_data = byte_buffer{};
+    dec_data.reserve(encrypted_data.size());
+
+    auto out_block = byte_buffer(size + EVP_MAX_BLOCK_LENGTH);
+    auto out_span = byte_span{out_block};
+    auto prev_block = iv;
+
+    for (const auto& block : blocks) {
+        auto len = decrypter.update(block, out_span);
+        auto dec_block = repeated_key_xor(out_span.first(len), prev_block);
+        dec_data.insert(dec_data.end(), dec_block.begin(), dec_block.end());
+        prev_block = byte_view{block};
+    }
+    decrypter.finalize(out_span);
+
+    auto pad = std::to_integer<int>(dec_data.back());
+    dec_data.resize(dec_data.size() - pad);
+
+    return dec_data;
+}
+
 } // end namespace crypto

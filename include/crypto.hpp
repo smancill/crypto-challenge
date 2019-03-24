@@ -38,6 +38,14 @@ byte_buffer encrypt_aes_ecb(byte_view data, byte_view key,
 byte_buffer decrypt_aes_ecb(byte_view encrypted_data, byte_view key,
                             int bits = 128);
 
+byte_buffer encrypt_aes_cbc(byte_view data,
+                            byte_view key, byte_view iv,
+                            int bits = 128);
+
+byte_buffer decrypt_aes_cbc(byte_view encrypted_data,
+                            byte_view key, byte_view iv,
+                            int bits = 128);
+
 } // end namespace crypto
 
 #endif

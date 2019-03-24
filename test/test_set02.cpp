@@ -54,3 +54,21 @@ TEST(Set02, OpenSslEcbEncryption)
 
     ASSERT_THAT(bytes2str(dec_msg), StrEq(msg));
 }
+
+
+TEST(Set02, OpenSslCbcEncryption)
+{
+    auto msg = "I wish the Ring had never come to me. "
+               "I wish none of this had happened.";
+
+    auto key = "0123456789012345";
+    auto iv = std::string{"\x00", 16};
+
+    auto enc_msg = encrypt_aes_cbc(str2bytes(msg), str2bytes(key), str2bytes(iv));
+    ASSERT_THAT(enc_msg.size(), Eq(80));
+
+    auto dec_msg = decrypt_aes_cbc(enc_msg, str2bytes(key), str2bytes(iv));
+    ASSERT_THAT(dec_msg.size(), Eq(71));
+
+    ASSERT_THAT(bytes2str(dec_msg), StrEq(msg));
+}
