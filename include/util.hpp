@@ -7,9 +7,9 @@ namespace crypto::util {
 
 std::string read_base64_file(const std::string& name);
 
-float english_score(const byte_buffer& data);
+float english_score(byte_view data);
 
-int hamming_distance(const byte_buffer& input1, const byte_buffer& input2);
+int hamming_distance(byte_view input1, byte_view input2);
 
 
 void pkcs_pad(byte_buffer& block, unsigned char block_size);

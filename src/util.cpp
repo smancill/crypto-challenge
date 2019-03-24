@@ -17,7 +17,7 @@ std::string read_base64_file(const std::string& name)
 }
 
 
-float english_score(const byte_buffer& data)
+float english_score(byte_view data)
 {
     static const auto freq = std::map<char, float>{
         {'a', .08167}, {'b', .01492}, {'c', .02782}, {'d', .04253},
@@ -40,7 +40,7 @@ float english_score(const byte_buffer& data)
 }
 
 
-int hamming_distance(const byte_buffer& input1, const byte_buffer& input2)
+int hamming_distance(byte_view input1, byte_view input2)
 {
     int count = 0;
     for (size_t i = 0; i < input1.size(); i++) {

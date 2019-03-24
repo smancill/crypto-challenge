@@ -43,6 +43,7 @@ add_library(crypto src/crypto.cpp src/util.cpp)
 target_include_directories(crypto PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_link_libraries(crypto PRIVATE base64 OpenSSL::Crypto)
+target_compile_definitions(crypto PUBLIC span_CONFIG_INDEX_TYPE=std::size_t)
 
 
 macro(add_crypto_exe set ch)

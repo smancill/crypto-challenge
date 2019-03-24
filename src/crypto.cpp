@@ -59,7 +59,7 @@ byte_buffer hex2bytes(std::string_view hex_data)
 }
 
 
-std::string bytes2hex(const byte_buffer& data)
+std::string bytes2hex(byte_view data)
 {
     auto ss = std::stringstream{};
     ss << std::hex;
@@ -80,13 +80,13 @@ byte_buffer str2bytes(std::string_view text)
 }
 
 
-std::string bytes2str(const byte_buffer& data)
+std::string bytes2str(byte_view data)
 {
     return {reinterpret_cast<const char*>(data.data()), data.size()};
 }
 
 
-std::string base64_encode(const byte_buffer& data)
+std::string base64_encode(byte_view data)
 {
     return ::base64_encode(buffer(data.data()), data.size());
 }
@@ -98,7 +98,7 @@ byte_buffer base64_decode(const std::string& encoded_text)
 }
 
 
-byte_buffer fixed_xor(const byte_buffer& input1, const byte_buffer& input2)
+byte_buffer fixed_xor(byte_view input1, byte_view input2)
 {
     auto output = byte_buffer(input1.size());
     std::transform(input1.begin(), input1.end(), input2.begin(),
@@ -107,7 +107,7 @@ byte_buffer fixed_xor(const byte_buffer& input1, const byte_buffer& input2)
 }
 
 
-byte_buffer single_byte_xor(const byte_buffer& data, byte_t key)
+byte_buffer single_byte_xor(byte_view data, byte_t key)
 {
     auto encrypted = byte_buffer(data.size());
     std::transform(data.begin(), data.end(), encrypted.begin(),
@@ -116,7 +116,7 @@ byte_buffer single_byte_xor(const byte_buffer& data, byte_t key)
 }
 
 
-byte_buffer repeated_key_xor(const byte_buffer& data, const byte_buffer& key)
+byte_buffer repeated_key_xor(byte_view data, byte_view key)
 {
     auto encrypted = byte_buffer(data.size());
     for (size_t i = 0, j = 0; i != data.size(); ++i) {
@@ -126,7 +126,7 @@ byte_buffer repeated_key_xor(const byte_buffer& data, const byte_buffer& key)
 }
 
 
-byte_t break_single_byte_xor(const byte_buffer& encrypted_data)
+byte_t break_single_byte_xor(byte_view encrypted_data)
 {
     struct {
         byte_t key{0};
@@ -147,7 +147,7 @@ byte_t break_single_byte_xor(const byte_buffer& encrypted_data)
 
 
 static std::vector<size_t> find_best_key_sizes(
-        const byte_buffer& input,
+        byte_view input,
         size_t hamming_blocks = 4,
         size_t min_size = 2,
         size_t max_size = 40)
@@ -159,9 +159,9 @@ static std::vector<size_t> find_best_key_sizes(
     auto hamming_dists = std::vector<Key>{};
 
     for (size_t key_size = min_size; key_size <= max_size; ++key_size) {
-        auto blocks = std::vector<byte_buffer>{};
+        auto blocks = std::vector<byte_view>{};
         for (size_t i = 0; i < hamming_blocks * key_size; i += key_size) {
-            blocks.emplace_back(input.begin() + i, input.begin() + i + key_size);
+            blocks.emplace_back(input.begin() + i, key_size);
         }
 
         float dist = 0;
@@ -189,7 +189,7 @@ static std::vector<size_t> find_best_key_sizes(
 }
 
 
-std::vector<byte_buffer> get_key_blocks(const byte_buffer& data, size_t key_size)
+std::vector<byte_buffer> get_key_blocks(byte_view data, size_t key_size)
 {
     auto blocks = std::vector<byte_buffer>(key_size);
     for (size_t i = 0; i < key_size; ++i) {
@@ -201,7 +201,7 @@ std::vector<byte_buffer> get_key_blocks(const byte_buffer& data, size_t key_size
 }
 
 
-byte_buffer break_repeated_key_xor(const byte_buffer& encrypted_data)
+byte_buffer break_repeated_key_xor(byte_view encrypted_data)
 {
     struct {
         byte_buffer key;
@@ -228,19 +228,19 @@ byte_buffer break_repeated_key_xor(const byte_buffer& encrypted_data)
 }
 
 
-byte_buffer decrypt_aes_ecb(const byte_buffer& encrypted_data,
-                            const byte_buffer& key,
+byte_buffer decrypt_aes_ecb(byte_view encrypted_data,
+                            byte_view key,
                             int bits)
 {
     class Decrypter {
     public:
-        explicit Decrypter(const byte_buffer& key, int bits)
+        explicit Decrypter(byte_view key, int bits)
         {
             EVP_DecryptInit_ex(ctx, get_cipher(bits), nullptr,
                     buffer(key.data()), nullptr);
         }
 
-        byte_buffer decrypt(const byte_buffer& encrypted)
+        byte_buffer decrypt(byte_view encrypted)
         {
             auto decrypted = byte_buffer(encrypted.size());
 
