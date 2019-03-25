@@ -1,0 +1,25 @@
+language: cpp
+
+env:
+  global:
+    - MAKEFLAGS=-j2
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      group: travis_latest
+      env:
+        - MATRIX_EVAL="export CC=gcc-8 CXX=g++-8"
+      addons:
+        apt:
+          packages:
+            - g++-8
+          sources:
+            - ubuntu-toolchain-r-test
+      before_install:
+        - eval "${MATRIX_EVAL}"
+
+script:
+  - mkdir build && cd build &&
+    cmake .. && make && make test

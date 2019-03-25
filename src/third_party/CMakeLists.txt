@@ -14,4 +14,5 @@ if(NOT base64_POPULATED)
 
   add_library(base64 STATIC ${base64_SOURCE_DIR}/base64.cpp)
   target_include_directories(base64 PUBLIC ${base64_SOURCE_DIR})
+  set_target_properties(base64 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
