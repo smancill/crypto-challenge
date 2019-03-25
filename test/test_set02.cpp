@@ -62,7 +62,7 @@ TEST(Set02, OpenSslCbcEncryption)
                "I wish none of this had happened.";
 
     auto key = "0123456789012345";
-    auto iv = std::string{"\x00", 16};
+    auto iv = std::string(16, '\x00');
 
     auto enc_msg = encrypt_aes_cbc(str2bytes(msg), str2bytes(key), str2bytes(iv));
     ASSERT_THAT(enc_msg.size(), Eq(80));

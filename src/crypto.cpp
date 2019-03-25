@@ -225,7 +225,7 @@ static std::vector<byte_view> split_and_pad(byte_view& data,
         blocks.pop_back();
     }
     util::pkcs_pad(last, block_size);
-    blocks.push_back(last);
+    blocks.emplace_back(last);
 
     return blocks;
 }
