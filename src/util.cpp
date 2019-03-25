@@ -71,7 +71,8 @@ void pkcs_unpad(byte_buffer& block)
 }
 
 
-std::vector<byte_view> split_into_blocks(byte_view data, size_t block_size)
+std::vector<byte_view> split_into_blocks(byte_view data,
+                                         unsigned char block_size)
 {
     auto blocks = std::vector<byte_view>{};
     size_t i = 0;

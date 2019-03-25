@@ -93,7 +93,7 @@ TEST(Set01, HammingDistance)
 
 
 namespace crypto {
-    std::vector<byte_buffer> get_key_blocks(byte_view, size_t);
+    std::vector<byte_buffer> get_key_blocks(byte_view, unsigned);
 }
 
 TEST(Set01, GetKeyBlocks)

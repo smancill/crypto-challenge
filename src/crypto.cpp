@@ -20,7 +20,7 @@ byte_buffer hex2bytes(std::string_view hex_data)
     bin_data.reserve(hex_data.size() / 2);
 
     char b[] = "00";
-    for (std::size_t i = 0; i < hex_data.size(); i += 2) {
+    for (size_t i = 0; i < hex_data.size(); i += 2) {
         b[0] = hex_data[i];
         b[1] = hex_data[i+1];
         auto n = std::stoul(b, nullptr, 16);
@@ -105,7 +105,7 @@ byte_t break_single_byte_xor(byte_view encrypted_data)
         float score{0};
     } msg;
 
-    for (short i = 0; i < 256; ++i) {
+    for (unsigned i = 0; i < 256; ++i) {
         auto key = byte_t{static_cast<unsigned char>(i)};
         auto score = util::english_score(single_byte_xor(encrypted_data, key));
         if (score > msg.score) {
@@ -118,19 +118,19 @@ byte_t break_single_byte_xor(byte_view encrypted_data)
 }
 
 
-static std::vector<size_t> find_best_key_sizes(
+static std::vector<unsigned> find_best_key_sizes(
         byte_view input,
-        size_t hamming_blocks = 4,
-        size_t min_size = 2,
-        size_t max_size = 40)
+        unsigned hamming_blocks = 4,
+        unsigned min_size = 2,
+        unsigned max_size = 40)
 {
     struct Key {
-        size_t key_size;
+        unsigned key_size;
         float norm_dist;
     };
     auto hamming_dists = std::vector<Key>{};
 
-    for (size_t key_size = min_size; key_size <= max_size; ++key_size) {
+    for (unsigned key_size = min_size; key_size <= max_size; ++key_size) {
         auto blocks = std::vector<byte_view>{};
         for (size_t i = 0; i < hamming_blocks * key_size; i += key_size) {
             blocks.emplace_back(input.begin() + i, key_size);
@@ -152,7 +152,7 @@ static std::vector<size_t> find_best_key_sizes(
     );
 
     auto const max_keys = 3;
-    auto best_key_sizes = std::vector<size_t>(max_keys);
+    auto best_key_sizes = std::vector<unsigned>(max_keys);
     std::transform(hamming_dists.begin(), hamming_dists.begin() + max_keys,
                    best_key_sizes.begin(),
                    [](auto const& i) { return i.key_size; });
@@ -161,7 +161,7 @@ static std::vector<size_t> find_best_key_sizes(
 }
 
 
-std::vector<byte_buffer> get_key_blocks(byte_view data, size_t key_size)
+std::vector<byte_buffer> get_key_blocks(byte_view data, unsigned key_size)
 {
     auto blocks = std::vector<byte_buffer>(key_size);
     for (size_t i = 0; i < key_size; ++i) {
@@ -216,7 +216,7 @@ byte_buffer decrypt_aes_ecb(byte_view encrypted_data, byte_view key, int bits)
 
 static std::vector<byte_view> split_and_pad(byte_view& data,
                                             byte_buffer& last,
-                                            size_t block_size)
+                                            unsigned char block_size)
 {
     auto blocks = util::split_into_blocks(data, block_size);
 

@@ -14,6 +14,8 @@ using byte_buffer = std::vector<byte_t>;
 using byte_view = nonstd::span<const byte_t>;
 using byte_span = nonstd::span<byte_t>;
 
+using std::size_t;
+
 } // end namespace crypto
 
 #endif
