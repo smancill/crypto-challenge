@@ -295,4 +295,13 @@ byte_buffer decrypt_aes_cbc(byte_view encrypted_data,
     return dec_data;
 }
 
+
+CipherMode detect_cipher_mode(byte_view encrypted_data)
+{
+    if (util::has_duplicated_blocks(encrypted_data)) {
+        return CipherMode::ECB;
+    }
+    return CipherMode::CBC;
+}
+
 } // end namespace crypto

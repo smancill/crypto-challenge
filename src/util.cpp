@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <random>
+#include <set>
 
 namespace crypto::util {
 
@@ -71,6 +73,31 @@ void pkcs_unpad(byte_buffer& block)
 }
 
 
+static std::mt19937& random_generator() {
+    thread_local std::mt19937 mt{std::random_device{}()};
+    return mt;
+}
+
+
+int random_int(int min, int max)
+{
+    auto dist = std::uniform_int_distribution<int>{min, max};
+    return dist(random_generator());
+}
+
+
+byte_buffer random_bytes(size_t size)
+{
+    auto& gen = random_generator();
+    auto dist = std::uniform_int_distribution<unsigned char>{0, 255};
+    auto bytes = byte_buffer(size);
+    std::generate(bytes.begin(), bytes.end(), [&]() {
+        return static_cast<byte_t>(dist(gen));
+    });
+    return bytes;
+}
+
+
 std::vector<byte_view> split_into_blocks(byte_view data,
                                          unsigned char block_size)
 {
@@ -84,6 +111,14 @@ std::vector<byte_view> split_into_blocks(byte_view data,
         blocks.emplace_back(&data[i], data.size() - i);
     }
     return blocks;
+}
+
+
+bool has_duplicated_blocks(byte_view encrypted_data)
+{
+    auto blocks = util::split_into_blocks(encrypted_data, 16);
+    auto unique_blocks = std::set<byte_view>{blocks.begin(), blocks.end()};
+    return blocks.size() != unique_blocks.size();
 }
 
 } // end namespace crypto::util

@@ -32,6 +32,12 @@ byte_t break_single_byte_xor(byte_view encrypted_data);
 byte_buffer break_repeated_key_xor(byte_view encrypted_data);
 
 
+enum class CipherMode
+{
+    ECB, CBC
+};
+
+
 byte_buffer encrypt_aes_ecb(byte_view data, byte_view key,
                             int bits = 128);
 
@@ -45,6 +51,9 @@ byte_buffer encrypt_aes_cbc(byte_view data,
 byte_buffer decrypt_aes_cbc(byte_view encrypted_data,
                             byte_view key, byte_view iv,
                             int bits = 128);
+
+CipherMode detect_cipher_mode(byte_view encrypted_data);
+
 
 } // end namespace crypto
 
