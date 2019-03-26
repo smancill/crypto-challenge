@@ -3,6 +3,7 @@
 
 #include "types.hpp"
 
+#include <functional>
 #include <string>
 #include <string_view>
 
@@ -51,6 +52,8 @@ byte_buffer encrypt_aes_cbc(byte_view data,
 byte_buffer decrypt_aes_cbc(byte_view encrypted_data,
                             byte_view key, byte_view iv,
                             int bits = 128);
+
+unsigned char detect_block_size(std::function<byte_buffer(byte_view)> const& oracle);
 
 CipherMode detect_cipher_mode(byte_view encrypted_data,
                               unsigned char block_size = 16);

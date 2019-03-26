@@ -72,3 +72,14 @@ TEST(Set02, OpenSslCbcEncryption)
 
     ASSERT_THAT(bytes2str(dec_msg), StrEq(msg));
 }
+
+
+TEST(Set02, DetectBlockSize)
+{
+    auto key = util::random_bytes(16);
+    auto block_size = detect_block_size([&](auto data) {
+        return encrypt_aes_ecb(data, key);
+    });
+
+    ASSERT_THAT(block_size, Eq(16));
+}

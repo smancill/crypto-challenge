@@ -296,6 +296,24 @@ byte_buffer decrypt_aes_cbc(byte_view encrypted_data,
 }
 
 
+unsigned char detect_block_size(std::function<byte_buffer(byte_view)> const& oracle)
+{
+    auto const max_size = 256;
+    auto input_data = byte_buffer(max_size, byte_t{'A'});
+
+    auto prev_size = oracle(byte_view{}).size();
+    for (size_t i = 1; i <= max_size; ++i) {
+        auto current_size = oracle({input_data.data(), i}).size();
+        auto diff = current_size - prev_size;
+        if (diff > 1) {
+            return diff;
+        }
+    }
+    throw std::domain_error{"could not detect block size < "
+            + std::to_string(max_size)};
+}
+
+
 CipherMode detect_cipher_mode(byte_view encrypted_data,
                               unsigned char block_size)
 {

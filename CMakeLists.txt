@@ -61,6 +61,7 @@ add_crypto_exe(01 08)
 
 add_crypto_exe(02 10)
 add_crypto_exe(02 11)
+add_crypto_exe(02 12)
 
 
 enable_testing()
