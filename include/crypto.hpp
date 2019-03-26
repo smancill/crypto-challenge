@@ -52,7 +52,8 @@ byte_buffer decrypt_aes_cbc(byte_view encrypted_data,
                             byte_view key, byte_view iv,
                             int bits = 128);
 
-CipherMode detect_cipher_mode(byte_view encrypted_data);
+CipherMode detect_cipher_mode(byte_view encrypted_data,
+                              unsigned char block_size = 16);
 
 
 } // end namespace crypto

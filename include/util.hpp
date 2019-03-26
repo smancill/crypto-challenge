@@ -12,7 +12,7 @@ float english_score(byte_view data);
 int hamming_distance(byte_view input1, byte_view input2);
 
 
-void pkcs_pad(byte_buffer& block, unsigned char block_size);
+void pkcs_pad(byte_buffer& block, unsigned char block_size = 16);
 
 void pkcs_unpad(byte_buffer& block);
 
@@ -23,9 +23,10 @@ byte_buffer random_bytes(size_t size);
 
 
 std::vector<byte_view> split_into_blocks(byte_view data,
-                                         unsigned char block_size);
+                                         unsigned char block_size = 16);
 
-bool has_duplicated_blocks(byte_view encrypted_data);
+bool has_duplicated_blocks(byte_view encrypted_data,
+                           unsigned char block_size = 16);
 
 } // end namespace crypto
 

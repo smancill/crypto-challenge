@@ -114,9 +114,9 @@ std::vector<byte_view> split_into_blocks(byte_view data,
 }
 
 
-bool has_duplicated_blocks(byte_view encrypted_data)
+bool has_duplicated_blocks(byte_view encrypted_data, unsigned char block_size)
 {
-    auto blocks = util::split_into_blocks(encrypted_data, 16);
+    auto blocks = util::split_into_blocks(encrypted_data, block_size);
     auto unique_blocks = std::set<byte_view>{blocks.begin(), blocks.end()};
     return blocks.size() != unique_blocks.size();
 }

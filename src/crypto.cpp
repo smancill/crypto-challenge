@@ -296,9 +296,10 @@ byte_buffer decrypt_aes_cbc(byte_view encrypted_data,
 }
 
 
-CipherMode detect_cipher_mode(byte_view encrypted_data)
+CipherMode detect_cipher_mode(byte_view encrypted_data,
+                              unsigned char block_size)
 {
-    if (util::has_duplicated_blocks(encrypted_data)) {
+    if (util::has_duplicated_blocks(encrypted_data, block_size)) {
         return CipherMode::ECB;
     }
     return CipherMode::CBC;
