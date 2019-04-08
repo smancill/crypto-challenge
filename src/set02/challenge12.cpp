@@ -69,20 +69,22 @@ byte_buffer get_secret(const F& oracle)
     }
 
     auto attack_data = byte_buffer(secret_size + block_size - 1, byte_t{'A'});
+    auto attack_span = byte_span(attack_data);
 
     for (size_t i = 0; i < secret_size; ++i) {
-        auto attack_span = byte_span(attack_data).subspan(i, block_size);
-
-        auto attack_size = (block_size - 1) - (i % block_size);
-        auto block_idx = i - (i % block_size);
+        auto idx = i % block_size;
+        auto attack_size = (block_size - 1) - idx;
+        auto block_start = i - idx;
 
         auto enc_data = oracle(attack_span.first(attack_size));
-        auto enc_block = byte_view(enc_data).subspan(block_idx, block_size);
+        auto enc_block = byte_view(enc_data).subspan(block_start, block_size);
+
+        auto input_span = attack_span.subspan(i, block_size);
 
         for (unsigned b = 0; b < 256; ++b) {
-            attack_span[block_size - 1] = static_cast<byte_t>(b);
+            input_span[block_size - 1] = static_cast<byte_t>(b);
 
-            auto out = oracle(attack_span);
+            auto out = oracle(input_span);
             auto out_block = byte_view(out).first(block_size);
 
             if (out_block == enc_block) {
