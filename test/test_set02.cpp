@@ -3,6 +3,8 @@
 
 #include <gmock/gmock.h>
 
+#include <stdexcept>
+
 using namespace crypto;
 using namespace testing;
 
@@ -36,6 +38,14 @@ TEST(Set02, Padding)
         util::pkcs_unpad(data);
         ASSERT_THAT(data, str2bytes("\x1a\x1b\x1c"));
     }
+}
+
+
+TEST(Set02, InvalidPadding)
+{
+    auto invalid_data = str2bytes("\x1a\x1b\x1c\x04\x04\x04");
+
+    EXPECT_THROW(util::pkcs_unpad(invalid_data), std::logic_error);
 }
 
 

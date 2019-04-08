@@ -69,6 +69,12 @@ void pkcs_pad(byte_buffer& block, unsigned char block_size)
 void pkcs_unpad(byte_buffer& block)
 {
     auto pad = std::to_integer<unsigned char>(block.back());
+    auto pad_span = byte_view(block).last(pad);
+    for (auto b : pad_span) {
+        if (b != block.back()) {
+            throw std::invalid_argument{"invalid padding"};
+        }
+    }
     block.resize(block.size() - pad);
 }
 
